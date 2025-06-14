@@ -14,9 +14,19 @@ except Exception as e:
 st.title("🔍 Prediksi Kategori Obesitas Berdasarkan Gaya Hidup")
 st.markdown("Masukkan informasi pribadi dan kebiasaan Anda di bawah ini:")
 
-# Input fitur
-gender_text = st.selectbox("Jenis Kelamin", ["Perempuan", "Laki-laki"])
-gender = 0 if gender_text == "Perempuan" else 1
+# Input numerik
+age = st.number_input("Umur (tahun)", 1, 100, value=25)
+height = st.number_input("Tinggi Badan (meter)", 1.0, 2.5, value=1.70)
+weight = st.number_input("Berat Badan (kg)", 30.0, 200.0, value=70.0)
+fcvc = st.slider("Frekuensi konsumsi sayuran (1–3)", 1.0, 3.0, value=2.0)
+ncp = st.slider("Jumlah makan per hari", 1.0, 5.0, value=3.0)
+ch2o = st.slider("Konsumsi air putih per hari (liter)", 1.0, 3.0, value=2.0)
+faf = st.slider("Aktivitas fisik per minggu (jam)", 0.0, 20.0, value=2.0)
+tue = st.slider("Waktu layar per hari (jam)", 0.0, 10.0, value=1.0)
+
+# Konversi selectbox (string to int encoding)
+gender = st.selectbox("Jenis Kelamin", ["Perempuan", "Laki-laki"])
+gender = 0 if gender == "Perempuan" else 1
 
 calc_text = st.selectbox("Konsumsi Alkohol", ["Selalu", "Sering", "Kadang-kadang", "Tidak Pernah"])
 calc = {"Selalu": 0, "Sering": 1, "Kadang-kadang": 2, "Tidak Pernah": 3}[calc_text]
@@ -42,17 +52,16 @@ mtrans = {"Mobil": 0, "Sepeda": 1, "Motor": 2, "Transportasi Umum": 3, "Jalan Ka
 # Prediksi
 if st.button("🔮 Prediksi"):
     try:
-        # Buat array input sesuai urutan training
+        # Susun input dan pastikan tipe data float
         sample = np.array([[age, gender, height, weight, calc, favc, fcvc, ncp,
                             scc, smoke, ch2o, family_history, faf, tue, caec, mtrans]],
                           dtype=np.float64)
 
-        # Validasi bentuk array
         if sample.shape != (1, 16):
-            st.error(f"Input tidak valid. Diharapkan shape (1, 16), ditemukan {sample.shape}")
+            st.error(f"Bentuk input salah: {sample.shape}, harus (1, 16)")
             st.stop()
 
-        # Transformasi dan prediksi
+        # Scaling dan prediksi
         sample_scaled = scaler.transform(sample)
         prediction = model.predict(sample_scaled)
         predicted_label = le_target.inverse_transform(prediction)
